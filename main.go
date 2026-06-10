@@ -11,11 +11,13 @@ import (
 )
 
 func main() {
+	// Initialising flags
 	csvFilenamePtr := flag.String("csv", "problems.csv", "A CSV file containing questions and answer in `question,answer` format.")
 	timeDurationPtr := flag.Int("limit", 30, "Time limit in which users must answer all questions.")
 	mustShufflePtr := flag.Bool("shuffle", false, "Specifies whether the questions should be presented in a pseudo-random order")
 	flag.Parse()
 
+	// Parsing flag arguments
 	csvFile, err := os.Open(*csvFilenamePtr)
 	if err != nil {
 		exitWithErrMsg(fmt.Sprintf("CSV file not found: %s\n", *csvFilenamePtr))
@@ -33,11 +35,13 @@ func main() {
 		})
 	}
 
+	// Main question-answer problem loop
 	correctNum := 0
 	timer := time.NewTimer(time.Duration(*timeDurationPtr) * time.Second)
 	for ind, problem := range problemList {
 		fmt.Printf("Problem #%d: %s\n", ind+1, problem.question)
 
+		// Goroutine waits for user response on separate thread without blocking main loop
 		responseCh := make(chan string)
 		go func() {
 			var response string
@@ -45,6 +49,7 @@ func main() {
 			responseCh <- response
 		}()
 
+		// Select statemet waits for either timer or response channel and proceeds accordingly
 		select {
 		case <-timer.C:
 			fmt.Println("\nTime's up!")
@@ -67,6 +72,8 @@ type problem struct {
 	answer   string
 }
 
+// Parses 2D slice of string into a 1D slice of problem
+// lines must only have two columns: question and answer
 func parseCsvLines(lines [][]string) []problem {
 	problemList := make([]problem, len(lines))
 	for ind, qaPair := range lines {
@@ -78,6 +85,7 @@ func parseCsvLines(lines [][]string) []problem {
 	return problemList
 }
 
+// Prints error message and exits with exit code 1
 func exitWithErrMsg(msg string) {
 	fmt.Println(msg)
 	os.Exit(1)
