@@ -38,6 +38,7 @@ func main() {
 	// Main question-answer problem loop
 	correctNum := 0
 	timer := time.NewTimer(time.Duration(*timeDurationPtr) * time.Second)
+	// Note: Initialization also incurs time costs; however, they are in the nanoseconds, so it's fine
 	for ind, problem := range problemList {
 		fmt.Printf("Problem #%d: %s\n", ind+1, problem.question)
 
